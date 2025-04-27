@@ -15,6 +15,7 @@ class Processor:
         self.PC = 0
         self.memory = memory
         self.halted = False
+        self.stack = []
 
     def reset(self):
         self.registers = [0] * 32
@@ -28,9 +29,14 @@ class Processor:
         self.execute(instr)
         self.PC += 1
 
-    def run(self):
-        while not self.halted:
+    def run(self, max_steps=1000):
+        steps = 0
+        while not self.halted and steps < max_steps:
             self.step()
+            steps += 1
+        if steps == max_steps:
+            print("Warning: Max steps reached. Possible infinite loop.")
+
 
     def execute(self, instr):
         """
@@ -82,14 +88,66 @@ class Processor:
                 else:
                     self.registers[rd] //= self.registers[rs]
 
+            # Logical instructions
+            case 'AND':
+                rd, rs = map(self._reg_index, args)
+                self.registers[rd] &= self.registers[rs]
+
+            case 'OR':
+                rd, rs = map(self._reg_index, args)
+                self.registers[rd] |= self.registers[rs]
+            
+            case 'SHL':
+                rd, rs = map(self._reg_index, args)
+                self.registers[rd] <<= self.registers[rs]
+
+            case 'SHR':
+                rd, rs = map(self._reg_index, args)
+                self.registers[rd] >>= self.registers[rs]
+
+            case 'CMP':
+                rd, rs = map(self._reg_index, args)
+                if self.registers[rd] == self.registers[rs]:
+                    self.flags['equal'] = 1
+                elif self.registers[rd] > self.registers[rs]:
+                    self.flags['above'] = 1
+                else:
+                    self.flags['below'] = 1
+
+            case 'NOT':
+                rd, rs = map(self._reg_index, args)
+                self.registers[rd] = ~self.registers[rs]
 
             # Transfer of Control
+            case 'JR':
+                offset = int(args[0])
+                self.PC = self.registers[self._reg_index(offset)] - 1 # -1 because the PC is incremented after fetch
+
             case 'JPC':
                 offset = int(args[0])
-                self.PC += offset - 1  # -1 porque o PC já foi incrementado após o fetch
+                self.PC += offset - 1 # -1 because the PC is incremented after fetch
+
+            case 'BRFL':
+                r = self._reg_index(args[0])
+                i7 = int(args[1], 2)  # Expected flags
+                m7 = int(args[2], 2)  # Mask
+                rflags_value = self._rflags_to_int()
+                print(f"rflags_value: {rflags_value}, i7: {i7}, m7: {m7}")
+                if (rflags_value & m7) == (i7 & m7):
+                    self.PC = self.registers[r] - 1  # Jump to address in register r
+                    return
+
+            case 'CALL':
+                r = self._reg_index(args[0])
+                self.stack.append(self.PC)  # Salva posição atual (sem incremento)
+                self.PC = self.registers[r] - 1
 
             case 'RET':
-                self.halted = True
+                if self.stack:
+                    self.PC = self.stack.pop()
+                else:
+                    print("Stack underflow on RET")
+                    self.halted = True
 
             case 'NOP':
                 pass
@@ -107,3 +165,19 @@ class Processor:
         # Formato: I16(RB)
         offset, rb = ref.replace(')', '').split('(')
         return int(offset), self._reg_index(rb)
+
+    def _rflags_to_int(self):
+        """Converte o dict de flags em um inteiro de 7 bits"""
+        bits = [
+            self.flags['overflow'],
+            self.flags['above'],
+            self.flags['equal'],
+            self.flags['below'],
+            self.flags['between'],
+            self.flags['collision'],
+            self.flags['error']
+        ]
+        value = 0
+        for bit in bits:
+            value = (value << 1) | bit
+        return value
