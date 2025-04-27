@@ -33,6 +33,11 @@ class Processor:
             self.step()
 
     def execute(self, instr):
+        """
+        Executes a single instruction.
+        The instruction is a string in the format 'OPCODE ARG1, ARG2, ...'.
+        RD, RS, and RB are register indices (0-31).
+        """
         opcode, *args = instr.strip().split()
         print(f"PC: {self.PC}, Executing: {instr}")
 
@@ -64,8 +69,19 @@ class Processor:
                 rd, rs = map(self._reg_index, args)
                 self.registers[rd] -= self.registers[rs]
 
-            case 'NOP':
-                pass
+            case 'MUL':
+                rd, rs = map(self._reg_index, args)
+                self.registers[rd] *= self.registers[rs]
+            
+            case 'DIV':
+                rd, rs = map(self._reg_index, args)
+                if self.registers[rs] == 0:
+                    print("Division by zero error")
+                    self.flags['error'] = 1
+                    self.halted = True
+                else:
+                    self.registers[rd] //= self.registers[rs]
+
 
             # Transfer of Control
             case 'JPC':
@@ -74,6 +90,9 @@ class Processor:
 
             case 'RET':
                 self.halted = True
+
+            case 'NOP':
+                pass
 
             # Default case for unknown instructions
             case _:
