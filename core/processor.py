@@ -120,8 +120,8 @@ class Processor:
 
             # Transfer of Control
             case 'JR':
-                offset = int(args[0])
-                self.PC = self.registers[self._reg_index(offset)] - 1 # -1 because the PC is incremented after fetch
+                offset = self._reg_index(args[0])
+                self.PC = self.registers[offset] - 1 # -1 because the PC is incremented after fetch
 
             case 'JPC':
                 offset = int(args[0])
@@ -132,14 +132,13 @@ class Processor:
                 i7 = int(args[1], 2)  # Expected flags
                 m7 = int(args[2], 2)  # Mask
                 rflags_value = self._rflags_to_int()
-                print(f"rflags_value: {rflags_value}, i7: {i7}, m7: {m7}")
                 if (rflags_value & m7) == (i7 & m7):
                     self.PC = self.registers[r] - 1  # Jump to address in register r
                     return
 
             case 'CALL':
                 r = self._reg_index(args[0])
-                self.stack.append(self.PC)  # Salva posição atual (sem incremento)
+                self.stack.append(self.PC)  # Save current position
                 self.PC = self.registers[r] - 1
 
             case 'RET':
