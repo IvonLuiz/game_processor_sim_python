@@ -1,5 +1,4 @@
 def print_register_state(processor):
-    """Print the current state of the processor registers."""
     print("\nRegister State:")
     for i in range(0, 32, 4):
         regs = [f"R{j}={processor.registers[j]}" for j in range(i, min(i + 4, 32))]

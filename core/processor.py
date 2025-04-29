@@ -27,6 +27,7 @@ class Processor:
 
     def step(self):
         instr = self.memory.get_instruction(self.PC)
+        print(instr)
         self.execute(instr)
         self.PC += 1
 
@@ -40,7 +41,7 @@ class Processor:
 
     def execute(self, instr):
         opcode, *args = instr.strip().split()
-        print(f"PC: {self.PC}, Executing: {instr}")
+        print(f"PC: {self.PC}, Executing: {opcode} {args}")
 
         # Types of instructions
         match opcode:

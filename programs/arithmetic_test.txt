@@ -1,8 +1,7 @@
 # Test program for arithmetic and logic operations
 
 # Initialize registers with test values
-MOV R1 R0    # R1 = 0
-ADD R1 R0    # R1 = 1 (increment R1)
+MOV R1 R0    # R1 = 1
 ADD R1 R1    # R1 = 2 (double R1)
 
 # Set up more test values
@@ -49,5 +48,5 @@ SHR R12 R1   # R12 = 16 >> 2 = 4
 MOV R13 R3   # R13 = 18
 MOV R14 R5   # R14 = 28
 CMP R13 R14  # Sets flags: below=1 (R13 < R14)
-
+RET
 # Test complete - results are in R1-R14
