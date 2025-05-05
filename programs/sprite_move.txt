@@ -9,22 +9,22 @@ SW R1 1000(R0)  # Store sprite level at mem[1000]
 SW R2 1001(R0)  # Store sprite ID at mem[1001]
 
 # Main game loop
-LOOP:
-LW R3 1002(R0)  # Load current row from mem[1002]
-LW R4 1003(R0)  # Load current col from mem[1003]
+# LOAD WORD
+# MEM->REG 3 The adress in 1002
+#  Obtenho a posicao
+LW R3 1005(R0)  # Load current row from mem[1002]
+LW R4 1006(R0)  # Load current col from mem[1003]
 
-# Update position (move sprite down and right)
-ADD R3 R5  # R3 += R5 (move down by value in R5)
-ADD R4 R6  # R4 += R6 (move right by value in R6)
+# Calculo a nova posicao
+ADD R3 R5  # R3 += R5 
+ADD R4 R6  # R4 += R6 
 
-# Store updated position
-SW R3 1002(R0)  # Store updated row
-SW R4 1003(R0)  # Store updated col
 
-# Store for display
-SW R1 1004(R0)  # Store sprite level for display
+# Guardo oq foi calculado para exibir 
 SW R3 1005(R0)  # Store row for display
 SW R4 1006(R0)  # Store col for display
+
+SW R1 1004(R0)  # Store sprite level for display
 
 # Jump back to continue loop
 JPC -10  # Jump back to "LW R3 1002(R0)"
