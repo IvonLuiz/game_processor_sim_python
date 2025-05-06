@@ -1,4 +1,5 @@
 def print_register_state(processor):
+    print("-" * 50)
     print("\nRegister State:")
     for i in range(0, 32, 4):
         regs = [f"R{j}={processor.registers[j]}" for j in range(i, min(i + 4, 32))]
